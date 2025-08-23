@@ -181,7 +181,12 @@ Thumbs.db
 *cursor*
 *windsurf*
 *aider*
-# CLAUDE.md should be tracked for documentation
+# Session Documentation (keep local only - prevent coding agent propagation)
+CLAUDE.md
+SESSION_*.md
+*_SESSION.md
+DEVELOPMENT_*.md
+
 .claude*
 .anthropic*
 
