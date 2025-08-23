@@ -1,0 +1,60 @@
+# Python cache files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Logs
+*.log
+logs/
+
+# Test files
+tests/
+test_*
+*_test.py
+
+# Development files
+.env.*
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Large files (keep models but ignore if too large)
+# Uncomment if models are too large for container
+# models/*.keras
+# models/*.h5
+
+# Node modules (if any)
+node_modules/

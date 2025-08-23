@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Segmentation System</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔍%3C/text%3E%3C/svg%3E"">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            margin-top: 10px;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .selection-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .dropdown-container {
+            margin-bottom: 30px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-name {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .image-city {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: capitalize;
+        }
+        
+        .no-images {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* Three-panel specific layout */
+        @media (min-width: 1200px) {
+            .result-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .result-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .result-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        
+        .result-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .image-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Image Segmentation System</h1>
+            <div class="subtitle">AI-Powered Segmentation System - v4.0 (SegFormer + Container API + Beautiful Masks)</div>
+        </div>
+        
+        <div class="content">
+            <!-- Dropdown Selection -->
+            <div class="selection-section">
+                <div class="section-title">📋 Select Image by Name</div>
+                <p>Choose an image name from the dropdown menu below.</p>
+                
+                <form id="dropdownForm">
+                    <div class="dropdown-container">
+                        <select id="imageDropdown" name="image_dropdown" required>
+                            <option value="">-- Select an image --</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">🎨 Generate Colorized Masks</button>
+                </form>
+            </div>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <!-- Image Gallery -->
+            <div class="selection-section">
+                <div class="section-title">🖼️ Click on Available Images</div>
+                <p>Click on any image placeholder below to generate colorized masks. Images are stored in Azure Storage.</p>
+                
+                <div id="imageGallery" class="image-gallery">
+                    <div class="no-images">
+                        <p>Loading images...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div id="loading" class="loading">
+                <p>🔄 Processing image... This may take a moment.</p>
+            </div>
+            
+            <!-- Results section -->
+            <div id="resultContainer" class="result-container">
+                <div class="section-title">📊 Segmentation Results</div>
+                <div id="resultGrid" class="result-grid">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Configuration
+const API_BASE_URL = 'https://ocp8-centralus-v2.azurewebsites.net/api'; // New Central US Azure Functions endpoint
+
+// DOM elements
+const imageDropdown = document.getElementById('imageDropdown');
+const imageGallery = document.getElementById('imageGallery');
+const dropdownForm = document.getElementById('dropdownForm');
+const loading = document.getElementById('loading');
+const resultContainer = document.getElementById('resultContainer');
+const resultGrid = document.getElementById('resultGrid');
+
+// State
+let availableImages = [];
+let allImageNames = [];
+
+// Initialize the application
+async function init() {
+    try {
+        await loadAvailableImages();
+        await loadImageNames();
+        renderImageGallery();
+        populateDropdown();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        showError('Failed to load application data. Please refresh the page.');
+    }
+}
+
+// Load available images from API - Updated for new API
+async function loadAvailableImages() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/images`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        availableImages = result.images || [];
+    } catch (error) {
+        console.error('Error loading available images:', error);
+        availableImages = [];
+    }
+}
+
+// Load all image names for dropdown - Updated to use images API
+async function loadImageNames() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/images`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        // Extract image names from the images list
+        allImageNames = result.images ? result.images.map(img => 
+            img.name.replace('images/', '').replace('.png', '').replace('.jpg', '')
+        ) : [];
+    } catch (error) {
+        console.error('Error loading image names:', error);
+        allImageNames = [];
+    }
+}
+
+// Render image gallery - Simplified for Azure Storage images
+function renderImageGallery() {
+    if (availableImages.length === 0) {
+        imageGallery.innerHTML = `
+            <div class="no-images">
+                <p>Images are stored in Azure Storage. Use the dropdown menu above to select an image.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Create clickable cards with real thumbnail images
+    imageGallery.innerHTML = availableImages.slice(0, 6).map(img => {
+        const imageName = img.name.replace('images/', '').replace('.png', '');
+        return `
+            <div class="image-card" onclick="segmentImage('${imageName}')">
+                <img id="thumb-${imageName}" alt="${imageName}" style="width: 100%; height: 200px; object-fit: cover; display: none;" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+                    🖼️
+                </div>
+                <div class="image-info">
+                    <div class="image-name">${imageName}</div>
+                    <div class="image-city">📁 Azure Storage</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Load thumbnail images asynchronously
+    availableImages.slice(0, 6).forEach(async (img) => {
+        try {
+            const imageName = img.name.replace('images/', '').replace('.png', '');
+            const response = await fetch(`${API_BASE_URL}/image-thumbnail?image_name=${encodeURIComponent(imageName)}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'success' && data.thumbnail) {
+                    const imgElement = document.getElementById(`thumb-${imageName}`);
+                    const placeholderElement = imgElement.nextElementSibling;
+                    if (imgElement) {
+                        imgElement.src = data.thumbnail;
+                        imgElement.style.display = 'block';
+                        placeholderElement.style.display = 'none';
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(`Failed to load thumbnail for ${imageName}:`, error);
+        }
+    });
+}
+
+// Populate dropdown with image names
+function populateDropdown() {
+    const options = allImageNames.map(name => 
+        `<option value="${name}">${name}</option>`
+    ).join('');
+    
+    imageDropdown.innerHTML = `
+        <option value="">-- Select an image --</option>
+        ${options}
+    `;
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    dropdownForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const selectedImage = imageDropdown.value;
+        if (selectedImage) {
+            await segmentImage(selectedImage);
+        }
+    });
+}
+
+// Segment image (main processing function) - Updated for colorized masks
+async function segmentImage(imageName, city = null) {
+    try {
+        showLoading(true);
+        hideResults();
+
+        // Clean up the image name for the API
+        let cleanImageName = imageName;
+        if (imageName.endsWith('_leftImg8bit')) {
+            cleanImageName = imageName;
+        } else {
+            cleanImageName = imageName.replace('.png', '').replace('.jpg', '');
+        }
+
+        // Call both endpoints in parallel
+        const [groundTruthResponse, aiPredictionResponse] = await Promise.all([
+            fetch(`${API_BASE_URL}/colorized-masks?image_name=${encodeURIComponent(cleanImageName)}`),
+            fetch(`${API_BASE_URL}/predict-with-container?image_name=${encodeURIComponent(cleanImageName)}`)
+        ]);
+
+        if (!groundTruthResponse.ok) {
+            const errorData = await groundTruthResponse.json().catch(() => ({ error: 'Unknown error occurred' }));
+            throw new Error(errorData.error || `HTTP ${groundTruthResponse.status}`);
+        }
+
+        const groundTruthResult = await groundTruthResponse.json();
+        
+        // Handle AI prediction (might timeout or fail)
+        let aiPredictionResult = null;
+        if (aiPredictionResponse.ok) {
+            try {
+                aiPredictionResult = await aiPredictionResponse.json();
+                console.log('✅ AI prediction successful:', aiPredictionResult);
+            } catch (error) {
+                console.log('⚠️ AI prediction failed to parse:', error);
+            }
+        } else {
+            console.log('⚠️ AI prediction API call failed:', aiPredictionResponse.status);
+        }
+
+        // Combine results
+        const combinedResult = {
+            ...groundTruthResult,
+            ai_prediction: aiPredictionResult
+        };
+        
+        displayColorizedResults(combinedResult);
+
+    } catch (error) {
+        console.error('Error during colorized mask generation:', error);
+        showError(`Colorized mask generation failed: ${error.message}`);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Create placeholder image using Canvas
+function createPlaceholderImage(text, bgColor) {
+    console.log('Creating placeholder image for:', text);
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = bgColor || '#f5f5f5';
+    ctx.fillRect(0, 0, 300, 200);
+    
+    // Text
+    ctx.fillStyle = '#666';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 150, 100);
+    
+    const dataUrl = canvas.toDataURL('image/png');
+    console.log('Generated data URL length:', dataUrl.length);
+    return dataUrl;
+}
+
+// Display colorized mask results - NEW FUNCTION for the colorized mask API
+function displayColorizedResults(result) {
+    if (result.status !== 'success') {
+        showError(result.error || 'Failed to generate colorized masks');
+        return;
+    }
+
+    const resultItems = [];
+
+    // Original Image
+    if (result.visualizations?.original) {
+        resultItems.push({
+            title: '📸 Original Image',
+            imageUrl: result.visualizations.original,
+            info: `Clean original image without any overlay`
+        });
+    }
+
+    // Ground Truth Mask
+    if (result.visualizations?.ground_truth) {
+        resultItems.push({
+            title: '🎯 Ground Truth Mask',
+            imageUrl: result.visualizations.ground_truth,
+            info: `Colorized segmentation mask (${result.mask_unique_values?.length} classes)`
+        });
+    }
+
+    // AI Model Prediction from Container API
+    if (result.ai_prediction?.status === 'success' && result.ai_prediction?.prediction_visualization) {
+        resultItems.push({
+            title: '🤖 AI Model Prediction',
+            imageUrl: result.ai_prediction.prediction_visualization,
+            info: `Fine-tuned SegFormer model prediction (${result.ai_prediction.model_info?.classes_found?.length || 0} classes detected)`
+        });
+    } else if (result.visualizations?.predicted) {
+        // Fallback to old prediction format
+        resultItems.push({
+            title: '🤖 AI Model Prediction',
+            imageUrl: result.visualizations.predicted,
+            info: `Fine-tuned SegFormer model prediction with beautiful colors`
+        });
+    } else {
+        // Show placeholder when prediction is not available
+        const errorMsg = result.ai_prediction?.message || 'Model is loading or not available yet';
+        resultItems.push({
+            title: '🤖 AI Model Prediction',
+            imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFJIE1vZGVsPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==',
+            info: errorMsg
+        });
+    }
+
+    // Render results with improved layout
+    resultGrid.innerHTML = resultItems.map(item => `
+        <div class="result-item">
+            <div class="result-title">${item.title}</div>
+            <img src="${item.imageUrl}" alt="${item.title}" loading="lazy" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            <p style="color: #666; font-size: 0.9em; margin-top: 10px; line-height: 1.4;">${item.info}</p>
+        </div>
+    `).join('');
+
+    showResults();
+}
+
+
+// Show/hide loading state
+function showLoading(show) {
+    loading.style.display = show ? 'block' : 'none';
+    
+    // Disable form during loading
+    const submitButtons = document.querySelectorAll('.submit-btn');
+    submitButtons.forEach(btn => {
+        btn.disabled = show;
+        btn.textContent = show ? '🔄 Processing...' : '🎨 Generate Colorized Masks';
+    });
+}
+
+// Show/hide results
+function showResults() {
+    resultContainer.style.display = 'block';
+    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function hideResults() {
+    resultContainer.style.display = 'none';
+}
+
+// Show error message
+function showError(message) {
+    resultGrid.innerHTML = `
+        <div class="result-item" style="background: #ffebee; border-left: 4px solid #f44336;">
+            <div class="result-title" style="color: #d32f2f;">❌ Error</div>
+            <p style="color: #666; margin: 10px 0;">${message}</p>
+            <p style="color: #999; font-size: 0.9em;">Please try again or select a different image.</p>
+        </div>
+    `;
+    showResults();
+}
+
+// Health check function (optional)
+async function checkHealth() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const health = await response.json();
+        console.log('API Health:', health);
+        return health;
+    } catch (error) {
+        console.warn('Health check failed:', error);
+        return null;
+    }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
+
+// Optional: Periodic health check
+setInterval(checkHealth, 300000); // Every 5 minutes
+    </script>
+</body>
+</html>
